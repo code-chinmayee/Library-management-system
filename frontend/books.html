@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Books</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <strong>Library Management System</strong>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a class="active" href="books.html">Books</a></li>
+        <li><a href="add-book.html">Add Book</a></li>
+        <li><a href="issue-book.html">Issue Book</a></li>
+        <li><a href="return-book.html">Return Book</a></li>
+        <li><a href="logout.html">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <section class="panel">
+        <h2>Books</h2>
+        <div class="search-bar">
+          <input id="searchInput" placeholder="Search by title, author, category, or ISBN" />
+          <button onclick="searchBooks()">Search</button>
+        </div>
+        <div id="message"></div>
+        <div id="booksList" class="book-list"></div>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => loadBooks());
+    </script>
+  </body>
+</html>

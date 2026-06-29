@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issue Book</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <strong>Library Management System</strong>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="books.html">Books</a></li>
+        <li><a href="add-book.html">Add Book</a></li>
+        <li><a class="active" href="issue-book.html">Issue Book</a></li>
+        <li><a href="return-book.html">Return Book</a></li>
+        <li><a href="logout.html">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <section class="panel">
+        <h2>Issue Book</h2>
+        <div id="message"></div>
+        <form id="issueBookForm">
+          <label>Student Name<input name="studentName" required /></label>
+          <label>Student ID<input name="studentId" required /></label>
+          <label>Book<select name="bookId" id="bookSelect" required></select></label>
+          <label>Issue Date<input name="issueDate" type="date" required /></label>
+          <button type="submit">Issue Book</button>
+        </form>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        populateBookSelect();
+        document.getElementById('issueBookForm').addEventListener('submit', submitIssueBookForm);
+      });
+    </script>
+  </body>
+</html>

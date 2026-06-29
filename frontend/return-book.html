@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Return Book</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <strong>Library Management System</strong>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="books.html">Books</a></li>
+        <li><a href="add-book.html">Add Book</a></li>
+        <li><a href="issue-book.html">Issue Book</a></li>
+        <li><a class="active" href="return-book.html">Return Book</a></li>
+        <li><a href="logout.html">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <section class="panel">
+        <h2>Issued Books</h2>
+        <div id="message"></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Student ID</th>
+              <th>Book</th>
+              <th>Issue Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="returnTableBody"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => loadIssuedBooks());
+    </script>
+  </body>
+</html>

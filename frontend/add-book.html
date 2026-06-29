@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Book</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <strong>Library Management System</strong>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="books.html">Books</a></li>
+        <li><a class="active" href="add-book.html">Add Book</a></li>
+        <li><a href="issue-book.html">Issue Book</a></li>
+        <li><a href="return-book.html">Return Book</a></li>
+        <li><a href="logout.html">Logout</a></li>
+      </ul>
+    </nav>
+
+    <div class="container">
+      <section class="panel">
+        <h2>Add New Book</h2>
+        <div id="message"></div>
+        <form id="addBookForm">
+          <label>Book Title<input name="title" required /></label>
+          <label>Author Name<input name="author" required /></label>
+          <label>Category<input name="category" required /></label>
+          <label>ISBN Number<input name="isbn" required /></label>
+          <label>Publication Year<input name="year" type="number" required /></label>
+          <label>Quantity<input name="quantity" type="number" min="1" required /></label>
+          <button type="submit">Add Book</button>
+        </form>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('addBookForm').addEventListener('submit', submitAddBookForm);
+      });
+    </script>
+  </body>
+</html>
