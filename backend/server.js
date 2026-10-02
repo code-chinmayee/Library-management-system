@@ -487,9 +487,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-connectDB().then(async () => {
-  await initializeData();
-  app.listen(PORT, () => {
-    console.log(`Library server is running at http://localhost:${PORT}`);
+connectDB()
+  .then(async () => {
+    await initializeData();
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Library server is listening on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Library server startup failed:', error);
+    process.exit(1);
   });
-});
