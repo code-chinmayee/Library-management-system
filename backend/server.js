@@ -54,6 +54,40 @@ async function initializeData() {
     if (memoryBooks.length === 0) {
       memoryBooks.push(...createSeedBooks(SEED_COUNT));
     }
+    if (memoryIssues.length === 0 && memoryBooks.length > 0) {
+      const first = memoryBooks[0];
+      const second = memoryBooks[1];
+      const third = memoryBooks[2];
+      memoryIssues.push(
+        {
+          id: 'issue-user-1',
+          studentName: 'Library User',
+          studentId: 'STU-USER-001',
+          bookTitle: first.title,
+          issueDate: '2026-09-01',
+          returnDate: '2026-09-08',
+          status: 'Returned'
+        },
+        {
+          id: 'issue-user-2',
+          studentName: 'Library User',
+          studentId: 'STU-USER-001',
+          bookTitle: second.title,
+          issueDate: '2026-09-18',
+          returnDate: '',
+          status: 'Issued'
+        },
+        {
+          id: 'issue-user-3',
+          studentName: 'Library User',
+          studentId: 'STU-USER-001',
+          bookTitle: third.title,
+          issueDate: '2026-09-22',
+          returnDate: '2026-09-27',
+          status: 'Returned'
+        }
+      );
+    }
     return;
   }
 
@@ -65,6 +99,39 @@ async function initializeData() {
     const books = createSeedBooks(SEED_COUNT);
     const missingCount = SEED_COUNT - existingCount;
     await Book.insertMany(books.slice(0, missingCount));
+  }
+
+  const existingIssuesCount = await Issue.countDocuments();
+  if (existingIssuesCount === 0) {
+    const books = await Book.find({}).limit(3);
+    if (books.length >= 3) {
+      await Issue.insertMany([
+        {
+          studentName: 'Library User',
+          studentId: 'STU-USER-001',
+          bookTitle: books[0].title,
+          issueDate: '2026-09-01',
+          returnDate: '2026-09-08',
+          status: 'Returned'
+        },
+        {
+          studentName: 'Library User',
+          studentId: 'STU-USER-001',
+          bookTitle: books[1].title,
+          issueDate: '2026-09-18',
+          returnDate: '',
+          status: 'Issued'
+        },
+        {
+          studentName: 'Library User',
+          studentId: 'STU-USER-001',
+          bookTitle: books[2].title,
+          issueDate: '2026-09-22',
+          returnDate: '2026-09-27',
+          status: 'Returned'
+        }
+      ]);
+    }
   }
 }
 
@@ -85,11 +152,11 @@ app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   if (email === 'admin@example.com' && password === 'admin123') {
-    return res.json({ success: true, role: 'admin', email, name: 'Admin User' });
+    return res.json({ success: true, role: 'admin', email, name: 'Admin User', studentId: 'ADMIN' });
   }
 
   if (email === 'user@example.com' && password === 'user123') {
-    return res.json({ success: true, role: 'user', email, name: 'Library User' });
+    return res.json({ success: true, role: 'user', email, name: 'Library User', studentId: 'STU-USER-001' });
   }
 
   return res.status(401).json({ message: 'Invalid login. Try admin@example.com/admin123 or user@example.com/user123.' });
@@ -281,6 +348,105 @@ app.post('/issue', async (req, res) => {
     });
     await issue.save();
     res.status(201).json(toIssuePayload(issue));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post('/issue/request', async (req, res) => {
+  try {
+    const { studentName, studentId, bookId, issueDate } = req.body;
+    if (!studentName || !studentId || !bookId || !issueDate) {
+      return res.status(400).json({ message: 'Student, book, and issue date are required' });
+    }
+
+    if (isFallbackMode()) {
+      const book = findBookById(memoryBooks, bookId);
+      if (!book) return res.status(404).json({ message: 'Book not found' });
+
+      const issue = {
+        id: `${Date.now()}`,
+        studentName,
+        studentId,
+        bookTitle: book.title,
+        issueDate,
+        returnDate: '',
+        status: 'Pending'
+      };
+      memoryIssues.push(issue);
+      return res.status(201).json(toIssuePayload(issue));
+    }
+
+    const book = await Book.findById(bookId);
+    if (!book) return res.status(404).json({ message: 'Book not found' });
+
+    const issue = new Issue({
+      studentName,
+      studentId,
+      bookTitle: book.title,
+      issueDate,
+      returnDate: '',
+      status: 'Pending'
+    });
+    await issue.save();
+    res.status(201).json(toIssuePayload(issue));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put('/issue/:id/approve', async (req, res) => {
+  try {
+    if (isFallbackMode()) {
+      const issue = memoryIssues.find((entry) => entry.id === req.params.id || entry._id === req.params.id);
+      if (!issue) return res.status(404).json({ message: 'Issue request not found' });
+      if (issue.status !== 'Pending') return res.status(400).json({ message: 'Only pending requests can be approved' });
+
+      const book = memoryBooks.find((entry) => entry.title === issue.bookTitle);
+      if (!book) return res.status(404).json({ message: 'Book not found' });
+      if (book.available <= 0) return res.status(400).json({ message: 'Book is out of stock' });
+
+      book.available -= 1;
+      issue.status = 'Issued';
+      return res.json({ message: 'Issue approved successfully', issue: toIssuePayload(issue) });
+    }
+
+    const issue = await Issue.findById(req.params.id);
+    if (!issue) return res.status(404).json({ message: 'Issue request not found' });
+    if (issue.status !== 'Pending') return res.status(400).json({ message: 'Only pending requests can be approved' });
+
+    const book = await Book.findOne({ title: issue.bookTitle });
+    if (!book) return res.status(404).json({ message: 'Book not found' });
+    if (book.available <= 0) return res.status(400).json({ message: 'Book is out of stock' });
+
+    book.available -= 1;
+    await book.save();
+
+    issue.status = 'Issued';
+    await issue.save();
+    res.json({ message: 'Issue approved successfully', issue: toIssuePayload(issue) });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put('/issue/:id/reject', async (req, res) => {
+  try {
+    if (isFallbackMode()) {
+      const issue = memoryIssues.find((entry) => entry.id === req.params.id || entry._id === req.params.id);
+      if (!issue) return res.status(404).json({ message: 'Issue request not found' });
+      if (issue.status !== 'Pending') return res.status(400).json({ message: 'Only pending requests can be rejected' });
+      issue.status = 'Rejected';
+      return res.json({ message: 'Issue rejected successfully', issue: toIssuePayload(issue) });
+    }
+
+    const issue = await Issue.findById(req.params.id);
+    if (!issue) return res.status(404).json({ message: 'Issue request not found' });
+    if (issue.status !== 'Pending') return res.status(400).json({ message: 'Only pending requests can be rejected' });
+
+    issue.status = 'Rejected';
+    await issue.save();
+    res.json({ message: 'Issue rejected successfully', issue: toIssuePayload(issue) });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

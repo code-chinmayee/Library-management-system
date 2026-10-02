@@ -14,5 +14,14 @@
             <a href="login.html">Login Again</a>
         </section>
     </div>
+    <script src="script.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        localStorage.removeItem('libraryUser');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 500);
+      });
+    </script>
 </body>
 </html>
