@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://lms-library.onrender.com';
 
 function showMessage(text, type = 'success') {
   const message = document.getElementById('message');
