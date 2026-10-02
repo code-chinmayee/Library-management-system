@@ -1,4 +1,4 @@
-const API_BASE = 'https://lms-library.onrender.com';
+const API_BASE = 'https://library-management-system-q40z.onrender.com';
 
 function showMessage(text, type = 'success') {
   const message = document.getElementById('message');
